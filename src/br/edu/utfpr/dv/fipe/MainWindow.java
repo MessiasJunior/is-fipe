@@ -27,6 +27,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.media.sound.ModelOscillator;
 
 public class MainWindow {
 
@@ -176,10 +177,41 @@ public class MainWindow {
 	}
 	
 	private void carregarAnos(Marca marca, Modelo modelo) {
-		this.comboAno.removeAllItems();
+		try {
+			String json = getContent(
+					"https://parallelum.com.br/fipe/api/v1/carros/marcas/" +
+					String.valueOf(marca.getCodigo()) +	String.valueOf(modelo.getCodigo() + "/anos"));
+			
+			ObjectMapper mapper = new ObjectMapper();
+			List<Ano> anos = mapper.readValue(json, 
+					new TypeReference<List<Ano>>() {});			
+			this.comboAno.removeAllItems();
+			for(Ano a : anos) {
+				this.comboAno.addItem(a);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 	}
 	
 	private void carregarValor(Marca marca, Modelo modelo, Ano ano) {
-		this.labelValor.setText("");
+		try {
+			String json = getContent(
+					"https://parallelum.com.br/fipe/api/v1/carros/marcas/" +
+					String.valueOf(marca.getCodigo()) +	
+					String.valueOf(modelo.getCodigo()) + 
+					"/anos/" +
+					String.valueOf(ano.getCodigo()));
+			
+			ObjectMapper mapper = new ObjectMapper();
+			Veiculo modelos = mapper.readValue(json, Veiculo.class);
+			
+				this.labelValor.setText(modelos.getValor());
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
